@@ -1,6 +1,6 @@
 let base = require('./base.js')
 // 命令式编程
-let calculate = x => (x + 10) * 10
+//let calculate = x => (x + 10) * 10
 // 1.有共同的参数 x
 // 2.函数的执行顺序是 从右到左
 // 使用递归
@@ -35,4 +35,5 @@ let compose2 = (...fns) => {
     }
   }
 }
-console.log('compose2:'+compose2(base.multi,base.add)(10))
+console.log('compose2:' + compose2(base.multi, base.add)(10))
+module.exports = { compose, compose2 }

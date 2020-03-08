@@ -32,4 +32,5 @@ let pipe2 = (...fns) => {
     }
   }
 }
-console.log('pipe2:' + pipe2(base.add,base.multi)(10))
+console.log('pipe2:' + pipe2(base.add, base.multi)(10))
+module.exports = { pipe, pipe2 }

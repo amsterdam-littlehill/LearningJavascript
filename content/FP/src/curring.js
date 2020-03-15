@@ -5,10 +5,14 @@ function currying (fn) {
   var limit = fn.length
   var params = [] // 存储递归过程的所有参数，用于递归出口计算值
   return function _curry (...args) {
-    params = params.concat(args) // 收集递归参数
+    params = params.concat(...args) // 收集递归参数
     if (limit <= params.length) {
+      let tempParams = params.slice(0, limit)
+      if (limit === params.length) { //参数个数满足时清除已缓存的参数
+        params = []
+      }
       // 返回函数执行结果
-      return fn.apply(null, params)
+      return fn.apply(null, tempParams)
     } else {
       // 返回一个柯里化函数
       return _curry
@@ -20,6 +24,11 @@ function add (x, y, z) {
   return x + y + z
 }
 
+var addCurried = currying(add)
+console.log(`addCurried(1)(2)(3)`, addCurried(1)(2)(3))//6
+console.log(`addCurried(3,3,3)`, addCurried(3, 3, 3))//9
+console.log(`addCurried(1,2)(3)`, addCurried(1, 2)(3))//6
+console.log(`addCurried(3)(4,5)`, addCurried(3)(4, 5))//12
 /**
  * 高级柯里化
  * @param func

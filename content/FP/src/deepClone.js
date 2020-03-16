@@ -1,11 +1,5 @@
 /**
- * 1.对象
- * 2.函数
- * 3.正则
- * 4.数组
- * 5.基本数据类型
- * 6.Symbol
- * 7.Date
+ * 自身可枚举、自身不可枚举、自身 Symbol 类型键、原型上可枚举、原型上不可枚举、原型上的 Symbol 类型键，循环引用
  * @param source
  * @return {{}}
  */
@@ -43,68 +37,100 @@ const deepCopy = source => {
   return split(target)
 
 }
-
-// 简化递归
-const deepCloneClourse = (obj) => {
-  //检测循环引用
-  try {
-    JSON.stringify(obj)
-  } catch (e) {
-    throw e
-  }
-  let cloneObj
-  let objectType = getType(obj)
-  switch (objectType) {
-    // Object
-    case 'Object':
-      cloneObj = getType(obj, 'Array') ? [] : {}
-      for (let item in obj) {
-        if (obj.hasOwnProperty(item)) {
-          cloneObj[item] = deepCloneClourse(obj[item])
-        }
+const deepCloneByJson = (obj) => {
+  // 声明cache变量，便于匹配是否有循环引用的情况
+  let cache = []
+  let str = JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'object' && value !== null) {
+      if (cache.indexOf(value) !== -1) {
+        // 移除
+        return
       }
-      //key-value 类型中Key可能是symbol
-      Object.getOwnPropertySymbols(obj).forEach(item => {
-        let symbol = Object(Symbol.prototype.valueOf.call(item))
-        cloneObj[symbol] = deepCloneClourse(obj[item])
-      })
-      break
-    // 容器类
-    case 'Set':
-      cloneObj = new Set()
-      obj.forEach((val) => {
-        cloneObj.add(deepCloneClourse(val))
-      })
-      break
-    case 'Map':
-      cloneObj = new Map()
-      obj.forEach((val, key) => {
-        cloneObj.set(key, deepCloneClourse(val))
-      })
-      //key-value 类型中Key可能是symbol
-      Object.getOwnPropertySymbols(obj).forEach(item => {
-        let symbol = Object(Symbol.prototype.valueOf.call(item))
-        cloneObj[symbol] = deepCloneClourse(obj[item])
-      })
-      break
-    case 'Array':
-      cloneObj = []
-      obj.forEach((val) => {
-        cloneObj.push(deepCloneClourse(val))
-      })
-      break
-    // 普通对象
-    case 'RegExp':
-    case 'Date':
-      cloneObj = new obj.constructor(obj)
-      break
-    case 'Symbol':
-      cloneObj = Object(Symbol.prototype.valueOf.call(obj))
-      break
-    default://null undefined NaN string number boolean
-      cloneObj = obj
+      // 收集所有的值
+      cache.push(value)
+    }
+    return value
+  })
+  cache = null
+  return JSON.parse(str)
+}
+const cache = (caches, obj) => {
+  let cached = caches.get(obj)
+  if (cached) {
+    return cached
   }
-  return cloneObj
+  return null
+}
+// 简化递归
+const deepCloneClourse = (target) => {
+  let cached = new WeakMap()
+
+  function baseClone (obj) {
+    let objectType = getType(obj)
+    let cloneObj
+    // 检测对象是否已克隆 返回克隆后的对象
+    let temp = cache(cached, obj)
+    if (temp) {
+      return temp
+    }
+    switch (objectType) {
+      // Object
+      case 'Object':
+        //缓存已克隆对象
+        cached.set(obj, cloneObj = {})
+        for (let item in obj) {
+          if (obj.hasOwnProperty(item)) {
+            cloneObj[item] = baseClone(obj[item])
+          }
+        }
+        //key-value 类型中Key可能是symbol
+        Object.getOwnPropertySymbols(obj).forEach(item => {
+          let symbol = Object(Symbol.prototype.valueOf.call(item))
+          cloneObj[symbol] = baseClone(obj[item])
+        })
+        break
+      // 容器类
+      case 'Set':
+        //缓存已克隆对象
+        cached.set(obj, cloneObj = new Set())
+        obj.forEach((val) => {
+          cloneObj.add(baseClone(val, cached))
+        })
+        break
+      case 'Map':
+        //缓存已克隆对象
+        cached.set(obj, cloneObj = new Map())
+        obj.forEach((val, key) => {
+          cloneObj.set(key, baseClone(val))
+        })
+        //key-value 类型中Key可能是symbol
+        Object.getOwnPropertySymbols(obj).forEach(item => {
+          let symbol = Object(Symbol.prototype.valueOf.call(item))
+          cloneObj[symbol] = baseClone(obj[item])
+        })
+        break
+      case 'Array':
+        //缓存已克隆对象
+        cached.set(obj, cloneObj = [])
+        obj.forEach((val) => {
+          cloneObj.push(baseClone(val))
+        })
+        break
+      // 普通对象
+      case 'RegExp':
+      case 'Date':
+        cloneObj = new obj.constructor(obj)
+        break
+      case 'Symbol':
+        cloneObj = Object(Symbol.prototype.valueOf.call(obj))
+        break
+      default://null undefined NaN string number boolean
+        cloneObj = obj
+    }
+    return cloneObj
+  }
+
+  return baseClone(target)
 }
 /**
  * 获取对象类型
@@ -154,45 +180,4 @@ const isPrimitive = (val) => {
     'boolean' || typeof val === 'symbol'
 }
 
-function Foo () {
-  this.a = 1
-}
-
-Foo.prototype.b = 1
-Foo.c = function () {}
-let map = new Map
-map.set('a', 1)
-map.set('b', 2)
-let set = new Set
-set.add(1)
-set.add(2)
-let symb = Symbol(111)
-const x = {
-  [symb]: '222',
-  'arrays': ['a', ''],
-  'array-like objects': { '0': 'a', 'length': 1 },
-  'booleans': false,
-  'boolean objects': Object(false),
-  'date objects': new Date,
-  'Foo instances': new Foo,
-  'objects': { 'a': 0, 'b': 1, 'c': 2 },
-  'objects with object values': { 'a': /a/, 'b': ['B'], 'c': { 'C': 1 } },
-  'maps': map,
-  'null values': null,
-  'numbers': 0,
-  'number objects': Object(0),
-  'regexes': /a/gim,
-  'sets': set,
-  'strings': 'a',
-  'string objects': Object('a'),
-  'undefined values': undefined,
-}
-//检测循环引用
-//x.a=x
-let result = deepCloneClourse(x)
-for (let item of Reflect.ownKeys(x)) {
-  console.log(
-    `${x[item] + ''}--------${result[item] + ''} ===>${x[item] ===
-    result[item]}`)
-}
-
+module.exports = deepCloneClourse

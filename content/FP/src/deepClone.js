@@ -78,11 +78,6 @@ const deepCloneClourse = (target) => {
       case 'Object':
         //缓存已克隆对象
         cached.set(obj, cloneObj = {})
-        for (let item in obj) {
-          if (obj.hasOwnProperty(item)) {
-            cloneObj[item] = baseClone(obj[item])
-          }
-        }
         //key-value 类型中Key可能是symbol
         Object.getOwnPropertySymbols(obj).forEach(item => {
           let symbol = Object(Symbol.prototype.valueOf.call(item))
@@ -118,14 +113,28 @@ const deepCloneClourse = (target) => {
         break
       // 普通对象
       case 'RegExp':
+        cloneObj = new RegExp(obj.source, obj.flags)
+        break
       case 'Date':
-        cloneObj = new obj.constructor(obj)
+        cloneObj = new Date(obj)
         break
       case 'Symbol':
         cloneObj = Object(Symbol.prototype.valueOf.call(obj))
         break
+      case 'Function':
+        cloneObj = function () {
+          return obj.apply(this, arguments)
+        }
+        break
       default://null undefined NaN string number boolean
         cloneObj = obj
+    }
+    if (typeof obj === 'object') {
+      for (let item in obj) {
+        if (obj.hasOwnProperty(item)) {
+          cloneObj[item] = baseClone(obj[item])
+        }
+      }
     }
     return cloneObj
   }

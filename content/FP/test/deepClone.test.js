@@ -1,5 +1,6 @@
 let deepCloneClourse = require('../src/deepClone.js')
 let assert = require('chai').assert
+let assert_node = require('assert')
 describe('deepClone.js.js: ', function () {
   function Foo () {
     this.a = 1
@@ -35,11 +36,27 @@ describe('deepClone.js.js: ', function () {
     'undefined values': undefined,
   }
   it('`deepCloneClourse` should perform a deep clone', function () {
-    let array = [{ 'a': 0 }, { 'b': 1 }],
-      actual = deepCloneClourse(array)
+    let actual = deepCloneClourse(objects)
+    assert_node.notDeepStrictEqual(actual, objects)
+    assert.ok(actual['arrays'] !== objects['arrays'])
+    assert.ok(actual['array-like objects'] !== objects['array-like objects'])
+    assert.ok(actual['booleans'] === objects['booleans'])
+    assert.ok(actual['boolean objects'] !== objects['boolean objects'])
+    assert.ok(actual['date objects'] !== objects['date objects'])
+    assert.ok(actual['Foo instances'] !== objects['Foo instances'])
+    assert.ok(actual['objects'] !== objects['objects'])
+    assert.ok(actual['objects with object values'] !==
+      objects['objects with object values'])
+    assert.ok(actual['maps'] !== objects['maps'])
+    assert.ok(actual['null values'] === objects['null values'])
+    assert.ok(actual['numbers'] === objects['numbers'])
+    assert.ok(actual['number objects'] !== objects['number objects'])
+    assert.ok(actual['regexes'] !== objects['regexes'])
+    assert.ok(actual['sets'] !== objects['sets'])
+    assert.ok(actual['strings'] !== objects['strings'])
+    assert.ok(actual['string objects'] !== objects['string objects'])
+    assert.ok(actual['undefined values'] !== objects['undefined values'])
 
-    assert.deepStrictEqual(actual, array)
-    assert.ok(actual !== array && actual[0] !== array[0])
   })
 
   it('`deepCloneClourse` should deep clone objects with circular references',
@@ -53,8 +70,11 @@ describe('deepClone.js.js: ', function () {
       object.bar.b = object.foo.b
 
       let actual = deepCloneClourse(object)
+      assert.deepStrictEqual(actual, object)
       assert.ok(actual.bar.b === actual.foo.b && actual === actual.foo.b.c.d &&
         actual !== object)
+      assert.deepStrictEqual(actual.bar.b, actual.foo.b)
+      assert.deepStrictEqual(actual, actual.foo.b.c.d)
     })
 
 })

@@ -45,6 +45,25 @@
     return obj
   }
 
+  _.extend = function () {
+    var target = arguments[0] || {}
+    var length = arguments.length
+    var i = 1
+    if (typeof target !== 'object') return target
+    let option
+    for (; i < length; i++) {
+      if ((option = arguments[i]) !== null) {
+        for (let prop of option) {
+          target[prop] = option[prop]
+        }
+      }
+    }
+    return target
+  }
+  _.clone = function (obj) {
+    if (!_isObject(obj)) return obj
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj)
+  }
   _.map1 = function (obj) {
     obj.push('123', 'hello')
     return obj

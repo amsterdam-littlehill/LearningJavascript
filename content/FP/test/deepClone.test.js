@@ -1,4 +1,9 @@
-let deepCloneClourse = require('../src/deepClone.js')
+let {
+  deepCloneClourse,
+  deepCopy,
+  deepCloneByJson,
+  cloneDeepByReduce_Map,
+} = require('../src/deepClone.js')
 let assert = require('chai').assert
 let assert_node = require('assert')
 describe('deepClone.js.js: ', function () {
@@ -50,12 +55,12 @@ describe('deepClone.js.js: ', function () {
     assert.ok(actual['maps'] !== objects['maps'])
     assert.ok(actual['null values'] === objects['null values'])
     assert.ok(actual['numbers'] === objects['numbers'])
-    assert.ok(actual['number objects'] !== objects['number objects'])
+    assert.ok(actual['number objects'] === objects['number objects'])
     assert.ok(actual['regexes'] !== objects['regexes'])
     assert.ok(actual['sets'] !== objects['sets'])
-    assert.ok(actual['strings'] !== objects['strings'])
-    assert.ok(actual['string objects'] !== objects['string objects'])
-    assert.ok(actual['undefined values'] !== objects['undefined values'])
+    assert.ok(actual['strings'] === objects['strings'])
+    assert.ok(actual['string objects'] === objects['string objects'])
+    assert.ok(actual['undefined values'] === objects['undefined values'])
 
   })
 

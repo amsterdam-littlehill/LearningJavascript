@@ -123,18 +123,16 @@ man['father'] = man;
   - RegExp 对象的 lastIndex 字段不会被保留
   - 属性描述符，setters 以及 getters（以及其他类似元数据的功能）同样不会被复制。例如，如果一个对象用属性描述符标记为 read-only，它将会被复制为 read-write，因为这是默认的情况下。
   - 原形链上的属性也不会被追踪以及复制。
-  - 
+
+可参考lodash等库函数的实现
+
 ## 总结
 
 - 在实际开发过程中，我们可以预估对象的基本结构，正确的使用深浅拷贝，避免在函数中因修改对象值照成数据异常的情形。
 - 大而全的东西，往往是最昂贵的。
 
-
-
-
-
-
 ## 参考
 
-[结构化克隆算法—MDN](https://developer.mozilla.org/zh-CN/docs/Web/Guide/API/DOM/The_structured_clone_algorithm)
-[Safe passing of structured data](https://html.spec.whatwg.org/multipage/structured-data.html#safe-passing-of-structured-data)
+- [结构化克隆算法—MDN](https://developer.mozilla.org/zh-CN/docs/Web/Guide/API/DOM/The_structured_clone_algorithm)
+- [Safe passing of structured data](https://html.spec.whatwg.org/multipage/structured-data.html#safe-passing-of-structured-data)
+

@@ -142,6 +142,64 @@ const deepCloneClourse = (target) => {
   return baseClone(target)
 }
 /**
+ * 基于map_reduce进行深复制
+ * @param obj
+ * @return {*}
+ */
+let cloneDeepByReduce_Map = function (obj) {
+  if (isArray(obj)) {
+    // 数组枚举
+    return obj.map(ele => {
+      return isArray(ele) || isObject(ele) ? cloneDeepByReduce_Map(ele) : ele
+    })
+  } else if (isObject(obj)) { // 迭代处理对象属性
+    return obj.reduceObj((memo, value, key) => {
+      memo[key] = isArray(value) || isObject(value)
+        ? cloneDeepByReduce_Map(value)
+        : value
+      return memo
+    }, {})
+  } else {
+    return obj
+  }
+}
+/**
+ * 判断是否是类数组
+ * @param collect
+ */
+let isArrayLike = function (collect) {
+  return typeof collect === 'object' && collect['length'] && collect.length >
+    0 && collect.length < Math.pow(2, 53) - 1
+}
+
+/**
+ * underscore createReduce
+ * @param direction
+ * @return {function(*=, *=, *=, *): *}
+ */
+function reduceFactory (direction = 1) {
+  let reducer = function (obj, iteratee, memo, initial) {
+    let keys = !isArrayLike(obj) && Object.keys(obj)
+    let length = (keys || obj).length
+    let index = direction > 0 ? 0 : length - 1
+    if (!initial) {
+      // 初始化数组第一个值或者对象的第一个属性
+      memo = obj[keys ? keys[index] : index]
+      index += direction
+    }
+    for (; index >= 0 && index < length; index += direction) {
+      let currentKey = keys ? keys[index] : index
+      memo = iteratee(memo, obj[currentKey], currentKey, obj)
+    }
+    return memo
+  }
+  return function (iteratee, memo, context) {
+    let initial = arguments.length >= 2
+    return reducer(this, iteratee, memo, initial)
+  }
+}
+
+/**
  * 获取对象类型
  */
 let getType = (obj, type) => {

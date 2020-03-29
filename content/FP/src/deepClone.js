@@ -7,7 +7,7 @@ const deepCopy = source => {
   //目标对象
   let target = Object.freeze(source)
 
-  function split (obj, propName) {
+  function split (obj) {
     let temp = null
     if (isObject(obj)) {
       temp = {}
@@ -120,6 +120,9 @@ const deepCloneClourse = (target) => {
         break
       case 'Symbol':
         cloneObj = Object(Symbol.prototype.valueOf.call(obj))
+        break
+      case 'Boolean':
+        cloneObj = Boolean(obj)
         break
       case 'Function':
         cloneObj = function () {
@@ -247,4 +250,9 @@ const isPrimitive = (val) => {
     'boolean' || typeof val === 'symbol'
 }
 
-module.exports = deepCloneClourse
+module.exports = {
+  deepCloneClourse,
+  deepCopy,
+  deepCloneByJson,
+  cloneDeepByReduce_Map,
+}
